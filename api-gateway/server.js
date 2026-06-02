@@ -10,14 +10,9 @@ const host = "localhost";
 app.set("views", path.join(__dirname));
 app.set("view engine", "ejs");
 
-app.get('/api/user/verify', async (req, res) => {
-    const id = req.query.id;
 
-    if (!id) {
-        return res.redirect("http://localhost:8000/index.php?page=login");
-    }
+async function isValidJWT(req, res) {
 
-    // 1. Wczytaj hasło z pliku
     const pass = fs.readFileSync("/Users/admin/Desktop/Authorization-server-OAuth2-JWT/server/pass.txt").toString();
 
     // 2. Pobierz secret z serwera Java
@@ -25,9 +20,9 @@ app.get('/api/user/verify', async (req, res) => {
     const resp = await response.text();
     const secret = JSON.parse(resp).secret;
 
-    
 
-    // 3. Pobierz token z cookie
+    // Pobieramy token z cookie
+
     const rawCookie = req.headers.cookie || "";
     const token = rawCookie
         .split("; ")
@@ -41,7 +36,6 @@ app.get('/api/user/verify', async (req, res) => {
 
     console.log("[*] Extracted token:", token);
 
-    // 4. Rozbij JWT
     const [jwt_header, jwt_payload, jwt_signature] = token.split(".");
 
     // 5. Oblicz podpis
@@ -68,6 +62,21 @@ app.get('/api/user/verify', async (req, res) => {
         console.log("[!] JWT INVALID");
     }
 
+    return control;
+
+}
+
+
+
+app.get('/api/user/verify', async (req, res) => {
+    const id = req.query.id;
+
+    if (!id) {
+        return res.redirect("http://localhost:8000/index.php?page=login");
+    }
+
+    var control = isValidJWT(req, res); // check is valid JWT token
+
 
     if(control){
         const request = await fetch("http://localhost:3000/api/users/view?id=" + id) // user-service/ in internal network
@@ -78,6 +87,29 @@ app.get('/api/user/verify', async (req, res) => {
         res.status(200).send(`Hello Vova! Your id is ${id}`);
     }
 });
+
+
+
+
+
+app.get("/api/render", async (req, res) => {
+
+    const url = req.query.reference;
+    
+    if (!url) {
+        return res.status(400).send("Bad Request: Missing 'reference' query parameter");
+    }
+
+    var control = isValidJWT(req, res); // check is valid JWT token
+
+    if (control) {
+        var request = await fetch("http://127.0.0.1:1337?url=" + url); // coming to render-service in internal network
+        var data = await request.text();
+        return res.status(200).send(data);
+    }
+
+});
+
 
 app.listen(port, () => {
     console.log(`APIGateway is running on: http://${host}:${port}`);
