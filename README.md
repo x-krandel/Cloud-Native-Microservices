@@ -30,6 +30,14 @@ This service trusts that if a request passed through the Gateway, the user is al
 /api/render?url=...
 ```
 
+**To get service off the land:**
+
+```
+npm init -y
+npm install express ejs
+node app.js
+```
+
 There's no validation (no IP blacklist/whitelist) on the provided URL, which opens the door to SSRF. Instead of passing a legit external link, you can point it at an internal, hidden Docker address, e.g.:
 
 ```
@@ -41,3 +49,5 @@ Since `renderer-service` is treated as a trusted member of the internal network,
 Combined, these two vulnerabilities let an attacker use the renderer as a pivot to reach internal-only endpoints and manipulate accounts it should never have access to.
 
 Note: only `api-gateway` is reachable from outside; `user-service` and `renderer-service` are not directly reachable from your host machine — only from within the Docker network.
+
+
