@@ -17,6 +17,10 @@ node index.js
 ```
 /api/users/view?id=15
 ```
+**To run:**
+```
+python3 app/main.py
+```
 
 This service trusts that if a request passed through the Gateway, the user is already authenticated — but it does **not** check whether the user is authorized to view that specific profile. Changing `id=15` to `id=1` lets you view another user's (e.g. admin's) data. That's the IDOR part.
 
