@@ -7,7 +7,9 @@ Main components are:
 1. **API Gateway**, the only service exposed to the outside world (port 8080). Every request goes through it, and it validates the JWT signature before proxying the request further into the internal network. To run the whole stack use:
 
 ```
-docker-compose up --build
+npm init -y
+npm install express ejs crypto-js
+node index.js
 ```
 
 2. **User Service**, which holds the business logic for user accounts. It exposes an endpoint like:
